@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Assign Managers to Employees{% endblock %}
+{% block content %}
+<div class="container my-4">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
+        </a>
+    </div>
+<h2 class="mb-4">Assign Managers to Employees</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">Employee-Manager Assignments</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Email</th>
+                        <th>Current Manager</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                        <tr>
+                            <td>{{ employee.name }}</td>
+                            <td>{{ employee.email }}</td>
+                            <td>
+                                {% if employee.manager_id %}
+                                    {% for manager in managers %}
+                                        {% if manager.id == employee.manager_id %}
+                                            {{ manager.name }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">Not assigned</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('assign_manager', employee_id=employee.id) }}" method="post" class="d-flex">
+                                    <select name="manager_id" class="form-select me-2" required>
+                                        <option value="">Select Manager</option>
+                                        {% for manager in managers %}
+                                            <option value="{{ manager.id }}" {% if employee.manager_id == manager.id %}selected{% endif %}>
+                                                {{ manager.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-primary">Assign</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

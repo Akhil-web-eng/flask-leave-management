@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Request Acknowledgment</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4>Leave Request Acknowledgment</h4>
+            </div>
+            <div class="card-body">
+                <p>You have been designated as a backup during the following leave period:</p>
+                
+                <ul class="list-group mb-4">
+                    <li class="list-group-item"><strong>Employee:</strong> {{ employee.name }}</li>
+                    <li class="list-group-item"><strong>Period:</strong> {{ leave.start_date.strftime('%d %b, %Y') }} to {{ leave.end_date.strftime('%d %b, %Y') }}</li>
+                    <li class="list-group-item"><strong>Leave Type:</strong> {{ leave.leave_type }}</li>
+                    {% if leave.comment %}
+                    <li class="list-group-item"><strong>Comment:</strong> {{ leave.comment }}</li>
+                    {% endif %}
+                </ul>
+                
+                <p>Click <strong>Acknowledge</strong> to confirm your availability as backup, or <strong>Reject</strong> if you are unavailable.</p>
+
+                <form method="POST">
+                    <div class="d-flex gap-2">
+                        <button type="submit" name="action" value="Acknowledge" class="btn btn-success">Acknowledge</button>
+                        <button type="submit" name="action" value="Reject" class="btn btn-danger">Reject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

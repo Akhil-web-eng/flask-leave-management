@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Employee Dashboard</h1>
+    <div class="alert alert-info">
+        Welcome, {{ employee.name }}!
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Leave Summary ({{ current_year }})</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <h3>{{ annual_limit }}</h3>
+                            <p>Annual Casual Leave Quota</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h3>{{ used_casual_leaves }}</h3>
+                            <p>Used Casual Leaves</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h3>{{ remaining_leaves }}</h3>
+                            <p>Remaining Casual Leaves</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Total Leave Usage ({{ current_year }})</h5>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-center mb-3">{{ used_leaves }} days</h3>
+                    <h6 class="text-center">Breakdown by Leave Type</h6>
+                    
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Leave Type</th>
+                                <th class="text-center">Days Used</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave_type, days in leave_types.items() %}
+                            <tr>
+                                <td>{{ leave_type }}</td>
+                                <td class="text-center">{{ days }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Quarterly Casual Leave Usage</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Quarter</th>
+                                    <th class="text-center">Days Used</th>
+                                    <th class="text-center">Limit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in range(1, 5) %}
+                                <tr>
+                                    <td>Q{{ i }}</td>
+                                    <td class="text-center">{{ quarterly_usage.get(i, 0) }}</td>
+                                    <td class="text-center">6</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Monthly Casual Leave Usage</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th class="text-center">Days Used</th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in range(1, 13) %}
+                                <tr>
+                                    <td>{{ month_name[i] }}</td>
+                                    <td class="text-center">{{ monthly_usage.get(i, 0) }}</td>
+                                    
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('apply_leave') }}" class="btn btn-primary">Apply for Leave</a>
+                <a href="{{ url_for('leave_history') }}" class="btn btn-secondary">View Leave History</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

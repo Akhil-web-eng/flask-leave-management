@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backup Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .reason, .work-assigned {
+      max-width: 300px;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <h2 class="text-center mb-4">Pending Leave Requests for Acknowledgement</h2>
+
+    <!-- Back to Backup Login Page -->
+    <div class="mb-3">
+      <a href="{{ url_for('backup_login') }}" class="btn btn-outline-secondary">← Back</a>
+    </div>
+
+    <!-- Flash Message Block -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% if pending_leaves %}
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center">
+          <thead class="table-dark">
+            <tr>
+              <th>Employee Name</th>
+              <th>Leave Type</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Leave Reason</th>
+              <th>Work Assigned</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for leave in pending_leaves %}
+            <tr>
+              <td>{{ leave.employee.name }}</td>
+              <td>{{ leave.leave_type }}</td>
+              <td>{{ leave.start_date }}</td>
+              <td>{{ leave.end_date }}</td>
+              <td class="reason">{{ leave.reason }}</td>
+              <td class="work-assigned">{{ leave.work_assigned }}</td>
+              <td>
+                <!-- Acknowledge Button -->
+                <form method="POST" action="{{ url_for('acknowledge_backup', leave_id=leave.id) }}" class="mb-1">
+                  <button type="submit" class="btn btn-success btn-sm w-100">
+                    ✅ Acknowledge
+                  </button>
+                </form>
+
+                <!-- Reject Button trigger -->
+                <button type="button" class="btn btn-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#rejectModal{{ leave.id }}">
+                  ❌ Reject
+                </button>
+
+                <!-- Modal for Rejection Reason -->
+                <div class="modal fade" id="rejectModal{{ leave.id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ leave.id }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <form method="POST" action="{{ url_for('reject_backup', leave_id=leave.id) }}">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="rejectModalLabel{{ leave.id }}">Reject Leave Request</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <label for="reason{{ leave.id }}" class="form-label">Reason for rejection:</label>
+                            <textarea class="form-control" name="rejection_reason" id="reason{{ leave.id }}" rows="3" required></textarea>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="submit" class="btn btn-danger">Submit Rejection</button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center" role="alert">
+        No pending leave requests for acknowledgment.
+      </div>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

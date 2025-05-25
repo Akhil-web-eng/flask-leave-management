@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Request Leave</h4>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('apply_leave') }}" onsubmit="return confirm('Are you sure you want to apply for leave?')">
+
+        <!-- Row 1: Leave Type and Backup Email -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="leave_type">Leave Type:</label>
+            <select class="form-control" name="leave_type" id="leave_type" required>
+              <option value="">-- Select Leave Type --</option>
+              <option value="Casual Leave">Casual Leave</option>
+              <option value="Sick/Emergency Leave">Sick/Emergency Leave</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="backup_email">Backup Email:</label>
+            <input type="email" class="form-control" id="backup_email" name="backup_email" required>
+            <small id="email-warning" class="form-text text-danger" style="display: none;">
+              Invalid backup email. Must end with @gmail.com, @360digitmg.com, or @aispry.com.
+            </small>
+          </div>
+        </div>
+
+        <!-- Row 2: Start Date and End Date -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="start_date">Start Date:</label>
+            <input type="text" class="form-control" id="start_date" name="start_date" required>
+          </div>
+          <div class="col-md-6">
+            <label for="end_date">End Date:</label>
+            <input type="text" class="form-control" id="end_date" name="end_date" required>
+          </div>
+        </div>
+
+        <!-- Row 3: Reason and Work Assigned -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="reason">Reason:</label>
+            <textarea class="form-control" id="reason" name="reason" rows="4" required></textarea>
+          </div>
+          <div class="col-md-6">
+            <label for="work_assigned">Work Assigned to Backup:</label>
+            <textarea class="form-control" id="work_assigned" name="work_assigned" rows="4" required></textarea>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="d-flex justify-content-between mt-4">
+          <button type="submit" class="btn btn-success" id="submit-btn">Submit Leave Request</button>
+          <a href="{{ url_for('employee_dashboard') }}" class="btn btn-secondary">Back</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Flatpickr styles & script -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+  const today = new Date();
+  const twoDaysAhead = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2);
+
+  const holidayDates = [
+    "2025-01-01", "2025-01-14", "2025-01-26", "2025-03-31",
+    "2025-04-14", "2025-05-01", "2025-07-06", "2025-08-15",
+    "2025-10-01", "2025-10-02", "2025-10-21", "2025-12-25"
+  ];
+
+  function disableSundaysAndHolidays(date) {
+    const iso = date.toISOString().split('T')[0];
+    return date.getDay() === 0 || holidayDates.includes(iso);
+  }
+
+  flatpickr("#start_date", {
+    dateFormat: "Y-m-d",
+    minDate: today,
+    disable: [disableSundaysAndHolidays],
+    onChange: function(selectedDates, dateStr, instance) {
+      if (selectedDates.length > 0) {
+        const selectedDate = selectedDates[0];
+        const leaveType = document.getElementById('leave_type').value;
+        if (selectedDate <= twoDaysAhead && leaveType !== 'Sick/Emergency Leave') {
+          alert('For leaves starting within 2 days, you can only apply for Emergency leave.');
+          instance.clear();
+          document.getElementById('end_date')._flatpickr.clear();
+          return;
+        }
+        const endPicker = document.getElementById('end_date')._flatpickr;
+        endPicker.set('minDate', dateStr);
+      }
+    }
+  });
+
+  flatpickr("#end_date", {
+    dateFormat: "Y-m-d",
+    disable: [disableSundaysAndHolidays],
+    onOpen: function(selectedDates, dateStr, instance) {
+      const startDate = document.getElementById("start_date").value;
+      if (startDate) {
+        instance.set("minDate", startDate);
+      }
+    }
+  });
+
+  const backupEmailInput = document.getElementById('backup_email');
+  const warning = document.getElementById('email-warning');
+  const submitBtn = document.getElementById('submit-btn');
+
+  backupEmailInput.addEventListener('blur', () => {
+    const email = backupEmailInput.value.trim();
+    if (!email) return;
+
+    const validDomains = ['@gmail.com', '@360digitmg.com', '@aispry.com'];
+    const isValid = validDomains.some(domain => email.endsWith(domain));
+
+    warning.style.display = isValid ? 'none' : 'block';
+    submitBtn.disabled = !isValid;
+  });
+
+  document.getElementById('leave_type').addEventListener('change', () => {
+    const startInput = document.getElementById('start_date');
+    if (startInput.value) {
+      document.getElementById('start_date')._flatpickr.setDate(startInput.value);
+    }
+  });
+</script>
+{% endblock %}

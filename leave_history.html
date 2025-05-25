@@ -1,0 +1,43 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Leave Requests</h4>
+        <button class="btn btn-secondary" onclick="window.history.back()">← Back</button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Reason</th>
+                    <th>Leave Type</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>{{ req.start_date }}</td>
+                    <td>{{ req.end_date }}</td>
+                    <td>{{ req.reason }}</td>
+                    <td>{{ req.leave_type }}</td>
+                    <td>
+                        {% if req.status == 'Approved' %}
+                            <span class="badge bg-success">{{ req.status }}</span>
+                        {% elif req.status == 'Rejected' %}
+                            <span class="badge bg-danger">{{ req.status }}</span>
+                        {% elif req.status == 'Pending' %}
+                            <span class="badge bg-warning text-dark">{{ req.status }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ req.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

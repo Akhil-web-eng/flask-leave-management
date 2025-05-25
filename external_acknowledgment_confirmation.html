@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Request Response</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4>Leave Request Status</h4>
+            </div>
+            <div class="card-body text-center">
+                {% if already_processed %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle fa-3x mb-3"></i>
+                        <h5>This leave request has already been processed.</h5>
+                    </div>
+                {% elif status == 'acknowledged' %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle fa-3x mb-3"></i>
+                        <h5>Thank you! The leave request has been acknowledged.</h5>
+                    </div>
+                {% elif status == 'rejected' %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle fa-3x mb-3"></i>
+                        <h5>The leave request has been rejected.</h5>
+                    </div>
+                {% else %}
+                    <div class="alert alert-secondary">
+                        <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                        <h5>Awaiting your response</h5>
+                        <p>Please acknowledge or reject this leave request.</p>
+                    </div>
+                {% endif %}
+                
+                <p>Leave details:</p>
+                <ul class="list-group mb-4">
+                    <li class="list-group-item"><strong>Employee:</strong> {{ employee.name }}</li>
+                    <li class="list-group-item"><strong>Period:</strong> {{ leave.start_date.strftime('%d %b, %Y') }} to {{ leave.end_date.strftime('%d %b, %Y') }}</li>
+                    <li class="list-group-item"><strong>Leave Type:</strong> {{ leave.leave_type }}</li>
+                    {% if status == 'rejected' and rejection_reason %}
+                    <li class="list-group-item"><strong>Rejection Reason:</strong> {{ rejection_reason }}</li>
+                    {% endif %}
+                </ul>
+
+                {% if status == 'acknowledged' or status == 'rejected' %}
+                <div class="text-muted">
+                    <small>Processed by: {{ backup_name }} on {{ processed_date.strftime('%d %b, %Y %H:%M') }}</small>
+                </div>
+                {% endif %}
+                
+                {% if not already_processed and not status %}
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-4 mb-2">
+                        <form action="{{ url_for('acknowledge_backup', leave_id=leave.id) }}" method="post">
+                            <input type="hidden" name="action" value="acknowledge">
+                            <button type="submit" class="btn btn-success btn-block">
+                                <i class="fas fa-check mr-2"></i> Acknowledge
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#rejectModal">
+                            <i class="fas fa-times mr-2"></i> Reject
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Reject Modal -->
+                <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="rejectModalLabel">Reject Leave Request</h5>
+                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form action="{{ url_for('acknowledge_backup', leave_id=leave.id) }}" method="post">
+                                <input type="hidden" name="action" value="reject">
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="rejection_reason">Reason for Rejection:</label>
+                                        <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="3" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- JS dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

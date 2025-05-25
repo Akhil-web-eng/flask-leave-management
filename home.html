@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Leave Management System{% endblock %}
+
+{% block content %}
+<div class="text-center mt-5">
+    <h2>Welcome to the Leave Management System</h2>
+    <p class="lead">This system allows employees to apply for leave and managers to approve or reject them.</p>
+    <p>Please use the options below to proceed:</p>
+
+    <div class="d-flex justify-content-center mt-4">
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg mx-2">Register</a>
+        <a href="{{ url_for('login') }}" class="btn btn-success btn-lg mx-2">Login</a>
+        <a href="{{ url_for('backup_login') }}" class="btn btn-success btn-lg mx-2">Backup Login</a>
+    </div>
+</div>
+{% endblock %}
